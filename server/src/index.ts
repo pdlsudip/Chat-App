@@ -1,12 +1,12 @@
-import express,{Request, Response} from 'express'
-const app = express()
-const port:number = 3000
-app.get("/", (req:Request, res:Response) => {
-   res.status(200).json({
-    msg: "Hello World"
-   })
+import "dotenv/config";
+import connectDB from "./db/connectdb";
+import app from "./app";
 
-})
-app.listen(port, () =>{
-    console.log(`The server is running at : http://localhost:${port}`)
-})
+const port = process.env.PORT || 3000;
+connectDB().then(() => {
+  console.log("Connected Successfuly");
+  app.listen(port, () => {
+    console.log(`The server is running at http://localhost:${port} `);
+  });
+});
+
