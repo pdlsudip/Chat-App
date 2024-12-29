@@ -1,16 +1,18 @@
-import express, { Request, Response } from "express";
-import User from "./models/user.model";
-
+import express from "express";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 const app = express();
-
-app.get("/", async (req: Request, res: Response) => {
-  const user = await User.create({
-    username: "sudip",
-    email: "sudip@gmail.com",
-    password: "dsfs",
-    name: "sudip",
-  });
-  res.json(user);
-});
-
+//routes
+app.use(express.json({ limit: "16kb" }));
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Allow your frontend domain
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // Allow cookies or credentials to be sent
+  }),
+);
+app.use(cookieParser());
+import userrouter from "./routes/user.routes";
+app.use("/api/v1/users", userrouter);
 export default app;
