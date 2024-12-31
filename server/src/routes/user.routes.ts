@@ -1,9 +1,7 @@
 import { Router } from "express";
-import { signInUser, signUpUser,getInfo } from "../controllers/user.comtrollers";
 import { auth } from "../middlewares/auth";
-const router = Router();
+import { getUsers } from "../controllers/user.controllers";
+const router = Router()
+router.route("/getallusers").get(auth, getUsers)
 
-router.route("/signup").post(signUpUser);
-router.route("/signin").post(signInUser);
-router.route("/info").get(auth , getInfo)
-export default router;
+export default router

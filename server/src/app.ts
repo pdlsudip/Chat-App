@@ -10,9 +10,13 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true, // Allow cookies or credentials to be sent
-  }),
+  })
 );
 app.use(cookieParser());
-import userrouter from "./routes/user.routes";
-app.use("/api/v1/users", userrouter);
+import authRouter from "./routes/auth.routes";
+import userRouter from "./routes/user.routes"
+import messageRouter from "./routes/message.routes";
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/messages", messageRouter)
+app.use("/api/v1/users", userRouter)
 export default app;
