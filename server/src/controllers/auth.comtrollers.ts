@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Request, Response } from "express";
-import User from "../models/user.models";
+import User, { UserType } from "../models/user.models";
 import bcrypt from "bcrypt";
 import generateJwtAndSetCookie from "../utils/generateJwt";
 const SECRET_KEY = process.env.SECRET_KEY;
@@ -10,6 +10,9 @@ const generateHash = async (password: string) => {
   const hashedPassword = await bcrypt.hash(password, salt);
   return hashedPassword;
 };
+interface CustomRequest extends Request {
+  user: UserType
+}
 
 const signUpUser = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -71,7 +74,7 @@ const signInUser = async (req: Request, res: Response) => {
       });
       return;
     }
-   const id = user._id
+    const id = user._id
     const isPasswordValid = await bcrypt.compare(password, user.password);
     console.log(isPasswordValid);
     if (isPasswordValid) {
@@ -92,11 +95,42 @@ const signInUser = async (req: Request, res: Response) => {
 
 const logout = async (req: Request, res: Response) => {
   try {
-    res.cookie("token", "", { maxAge: 0 }); // Clear the token cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      sameSite: "strict", // Same SameSite setting as during login
+      secure: process.env.NODE_ENV === "production", // Ensure secure is set based on environment
+    });
     res.status(200).json({ msg: "Logged out successfully" }); // Respond with a success message
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ msg: "Internal Server Error" }); // Handle any errors
   }
 };
-export { signUpUser, signInUser, logout };
+
+const getMe = async (req: Request, res: Response) => {
+  try {
+    const authUser = req.user;
+    const id = authUser._id;
+    console.log(id);
+    const user = await User.findById(id).select("-password");
+    if (!user) {
+      res.status(401).json({
+        msg: "Unauthorized Access: User not found.",
+      });
+      return;
+    }
+
+    // Respond with the authenticated user's details
+    res.status(200).json({
+      msg: "Authenticated User Present",
+      user,
+    });
+  } catch (error) {
+    console.error("Error in getMe:", error); // Log the error for debugging
+    res.status(500).json({
+      msg: "Internal Server Error",
+      error: error instanceof Error ? error.message : error,
+    });
+  }
+};
+export { signUpUser, signInUser, logout, getMe };
